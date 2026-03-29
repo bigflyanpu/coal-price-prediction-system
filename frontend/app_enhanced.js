@@ -1357,12 +1357,3 @@ window.addEventListener('load', function() {
         bsAlert.close();
     }, 5000);
 });
-
-// 导出模块（如果需要）
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        FeatureEngineeringSimulator,
-        generateEnhancedPriceHistory,
-        generateEnhancedPrediction
-    };
-}
