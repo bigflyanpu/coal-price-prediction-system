@@ -1,0 +1,42 @@
+{
+  "name": "coal-price-prediction-web",
+  "version": "1.0.0",
+  "description": "多尺度双轨制煤炭价格智能预测系统 - 基于南京大学创新训练项目",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "build": "echo '前端构建完成'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "echo '部署到生产环境'"
+  },
+  "keywords": [
+    "煤炭价格预测",
+    "双轨制定价",
+    "大宗商品预测",
+    "机器学习",
+    "时间序列预测",
+    "南京大学"
+  ],
+  "author": "祁昊然 <241870228@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/coal-price-prediction-system.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/coal-price-prediction-system/issues"
+  },
+  "homepage": "https://username.github.io/coal-price-prediction-system",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
