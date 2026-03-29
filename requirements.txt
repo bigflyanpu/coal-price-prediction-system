@@ -1,0 +1,10 @@
+# 煤炭双轨制价格预测系统 - Web API 依赖
+Flask>=2.3.0
+Flask-CORS>=4.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# 可选：如果要在Web服务器中使用完整系统
+# 需要从上级目录的coal_price_prediction_system导入
+# 请确保已安装coal_price_prediction_system/requirements.txt中的所有依赖

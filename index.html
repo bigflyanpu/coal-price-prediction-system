@@ -445,9 +445,239 @@
             </div>
         </div>
 
-        <!-- 价格预测面板 -->
+        <!-- 双轨制价格预测面板 -->
+        <div id="dual-track-prediction" class="mb-5">
+            <h2 class="text-center mb-4"><i class="fas fa-exchange-alt text-info me-2"></i>双轨制价格预测系统</h2>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>双轨制系统已集成！</strong> 实时API连接至稳健版预测服务器，提供市场价格与计划价格对比分析。
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-server me-2"></i>系统状态</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">API服务器</small>
+                                <h6 id="apiStatus">🔍 检查中...</h6>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">运行模式</small>
+                                <h6 id="apiMode">-</h6>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">响应时间</small>
+                                <h6 id="apiResponseTime">-</h6>
+                            </div>
+                            <button class="btn btn-outline-info w-100" onclick="checkAPIStatus()">
+                                <i class="fas fa-sync-alt me-2"></i>刷新状态
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>双轨制分析参数</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">煤炭类型</label>
+                                <select id="coalType" class="form-select">
+                                    <option value="thermal">动力煤</option>
+                                    <option value="coking">炼焦煤</option>
+                                    <option value="anthracite">无烟煤</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">基础价格参考</label>
+                                <input type="number" id="basePrice" class="form-control" value="750" step="10">
+                                <small class="text-muted">元/吨 (市场价格基准)</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">回溯天数</label>
+                                <input type="number" id="daysBack" class="form-control" value="7" min="1" max="30">
+                                <small class="text-muted">用于分析的历史数据天数</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">预测类型</label>
+                                <select id="predictionType" class="form-select">
+                                    <option value="quick">快速分析</option>
+                                    <option value="full">完整分析</option>
+                                </select>
+                            </div>
+                            <button id="dualTrackPredictBtn" class="btn btn-primary w-100">
+                                <i class="fas fa-bolt me-2"></i>执行双轨制分析
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 实时数据 -->
+                    <div class="card stat-card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>实时市场数据</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <small class="text-muted">当前市场价格</small>
+                                <h4 class="text-primary" id="currentMarketPrice">826.00 元/吨</h4>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">当前计划价格</small>
+                                <h4 class="text-success" id="currentPlannedPrice">764.86 元/吨</h4>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">价差百分比</small>
+                                <h4 class="text-warning" id="currentPriceDiff">8.0%</h4>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">推荐操作</small>
+                                <h6 id="currentRecommendation">观望</h6>
+                            </div>
+                            <button class="btn btn-outline-secondary w-100 btn-sm" onclick="loadQuickAnalysis()">
+                                <i class="fas fa-redo me-1"></i>刷新数据
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <!-- 双轨制分析结果 -->
+                    <div class="card prediction-card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-balance-scale-left me-2"></i>双轨制价格对比分析</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="loading" id="dualTrackLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">加载中...</span>
+                                </div>
+                                <p class="mt-2">正在执行双轨制分析...</p>
+                            </div>
+                            
+                            <div id="dualTrackResult">
+                                <div class="text-center p-4">
+                                    <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                                    <h5>等待双轨制分析</h5>
+                                    <p class="text-muted">设置分析参数后点击"执行双轨制分析"按钮</p>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-lightbulb me-2"></i>
+                                        <strong>提示：</strong> 系统将同时分析市场价格和计划价格，并提供交易建议
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 分析结果详情 -->
+                            <div id="dualTrackDetails" style="display: none;">
+                                <div class="row text-center mb-4">
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">市场价格预测</small>
+                                            <h3 class="text-primary" id="predictedMarketPrice">0.00</h3>
+                                            <span class="badge bg-primary price-badge">元/吨</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">计划价格预测</small>
+                                            <h3 class="text-success" id="predictedPlannedPrice">0.00</h3>
+                                            <span class="badge bg-success price-badge">元/吨</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded">
+                                            <small class="text-muted">价差</small>
+                                            <h3 class="text-warning" id="predictedPriceDiff">0.0%</h3>
+                                            <span class="badge bg-warning price-badge">百分比</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 交易建议 -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-purple text-white">
+                                        <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>交易建议与风险评估</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small class="text-muted">推荐操作</small>
+                                                <h4 id="recommendationAction">观望</h4>
+                                                <p class="small" id="recommendationReason">市场表现稳定</p>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">置信度</small>
+                                                <h4 id="recommendationConfidence">60%</h4>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-muted">风险等级</small>
+                                                <h4 id="recommendationRisk">中等</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 市场趋势 -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-muted">期货趋势</small>
+                                            <h5 id="futuresTrend">震荡</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-muted">库存趋势</small>
+                                            <h5 id="inventoryTrend">稳定</h5>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 bg-light rounded text-center">
+                                            <small class="text-muted">综合评分</small>
+                                            <h5 id="compositeScore">0.50</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 详细分析 -->
+                                <div class="card">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h6 class="mb-0"><i class="fas fa-file-alt me-2"></i>详细分析报告</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="analysisReport">
+                                            <p>详细分析报告将在执行完整分析后显示。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 双轨制价格走势图 -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>双轨制价格历史走势</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="dualTrackPriceChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-primary" onclick="loadPriceHistory()">
+                                    <i class="fas fa-redo me-1"></i>刷新价格历史
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 价格预测面板 (保留原有功能) -->
         <div id="prediction" class="mb-5">
-            <h2 class="text-center mb-4"><i class="fas fa-calculator text-primary me-2"></i>煤炭价格预测</h2>
+            <h2 class="text-center mb-4"><i class="fas fa-calculator text-primary me-2"></i>特征工程价格预测</h2>
             <div class="row">
                 <div class="col-md-4">
                     <div class="card">
@@ -472,18 +702,6 @@
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">煤炭类型</label>
-                                <select id="coalType" class="form-select">
-                                    <option value="thermal">动力煤</option>
-                                    <option value="coking">炼焦煤</option>
-                                    <option value="anthracite">无烟煤</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">预测日期</label>
-                                <input type="date" id="predictionDate" class="form-control" value="">
-                            </div>
-                            <div class="mb-3">
                                 <label class="form-label">特征工程模式</label>
                                 <select id="featureMode" class="form-select">
                                     <option value="basic">基础特征模式</option>
@@ -496,114 +714,20 @@
                             </button>
                         </div>
                     </div>
-                    
-                    <!-- 数据统计 -->
-                    <div class="card stat-card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>历史数据统计</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-2">
-                                <small class="text-muted">平均市场价格</small>
-                                <h4 class="text-primary">826.00 元/吨</h4>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">平均长协价</small>
-                                <h4 class="text-success">764.86 元/吨</h4>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">价格波动范围</small>
-                                <h4 class="text-warning">680.50 - 952.60 元/吨</h4>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted">数据覆盖时间</small>
-                                <h6>2018年1月 - 2024年12月</h6>
-                            </div>
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="col-md-8">
                     <!-- 预测结果 -->
                     <div class="card prediction-card">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>预测结果展示</h5>
+                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>特征工程预测结果</h5>
                         </div>
                         <div class="card-body">
-                            <div class="loading" id="loadingIndicator">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">加载中...</span>
-                                </div>
-                                <p class="mt-2">正在计算预测结果...</p>
-                            </div>
-                            
-                            <div id="predictionResult">
+                            <div id="featurePredictionResult">
                                 <div class="text-center p-4">
-                                    <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
-                                    <h5>等待预测</h5>
-                                    <p class="text-muted">设置预测参数后点击"开始预测"按钮</p>
-                                </div>
-                            </div>
-                            
-                            <!-- 预测详情 -->
-                            <div id="predictionDetails" style="display: none;">
-                                <div class="row text-center mb-4">
-                                    <div class="col-md-4">
-                                        <div class="p-3 bg-light rounded">
-                                            <small class="text-muted">预测价格</small>
-                                            <h3 class="text-primary" id="predictedPrice">0.00</h3>
-                                            <span class="badge bg-primary price-badge">元/吨</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="p-3 bg-light rounded">
-                                            <small class="text-muted">预测置信度</small>
-                                            <h3 class="text-success" id="confidenceLevel">0%</h3>
-                                            <span class="badge bg-success price-badge">置信水平</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="p-3 bg-light rounded">
-                                            <small class="text-muted">价格波动区间</small>
-                                            <h5 id="priceRange">0.00 - 0.00</h5>
-                                            <span class="badge bg-warning price-badge">元/吨</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- 特征使用情况 -->
-                                <div class="mb-4">
-                                    <h6><i class="fas fa-cogs me-2" style="color: #9b59b6;"></i>特征工程使用情况</h6>
-                                    <div id="featureUsage">
-                                        <!-- 动态生成特征使用情况 -->
-                                    </div>
-                                </div>
-                                
-                                <!-- 影响因素 -->
-                                <div class="mb-4">
-                                    <h6><i class="fas fa-balance-scale me-2"></i>关键影响因素</h6>
-                                    <div id="influencingFactors">
-                                        <!-- 动态生成影响因素 -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 价格走势图 -->
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i>煤炭价格走势图</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="priceChart"></canvas>
-                            </div>
-                            <div class="text-center mt-3">
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-primary active" data-period="daily">日度</button>
-                                    <button type="button" class="btn btn-outline-primary" data-period="monthly">月度</button>
-                                    <button type="button" class="btn btn-outline-primary" data-period="yearly">年度</button>
+                                    <i class="fas fa-cogs fa-3x text-muted mb-3"></i>
+                                    <h5>特征工程预测</h5>
+                                    <p class="text-muted">基于223维特征工程的多尺度价格预测</p>
                                 </div>
                             </div>
                         </div>
@@ -886,6 +1010,7 @@
 
     <!-- 脚本 -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="frontend/app_enhanced.js"></script>
+    <script src="frontend/app_api_integration.js"></script>
+    <script src="frontend/app_api_integration_enhanced.js"></script>
 </body>
 </html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>煤炭双轨制价格预测系统 - 集成测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .loading { color: orange; font-weight: bold; }
+        .api-endpoint { background: #f5f5f5; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .results { margin-top: 20px; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>煤炭双轨制价格预测系统 - 集成测试</h1>
+    <p>测试稳健版API服务器与前端集成</p>
+    
+    <div class="container">
+        <div class="card">
+            <h2>API端点测试</h2>
+            
+            <div class="api-endpoint">
+                GET /api/status
+            </div>
+            <button onclick="testStatus()">测试状态</button>
+            <div id="statusResult" class="results"></div>
+            
+            <div class="api-endpoint">
+                GET /api/dual-track/quick
+            </div>
+            <button onclick="testQuickAnalysis()">测试快速分析</button>
+            <div id="quickResult" class="results"></div>
+            
+            <div class="api-endpoint">
+                GET /api/market/trend
+            </div>
+            <button onclick="testMarketTrend()">测试市场趋势</button>
+            <div id="trendResult" class="results"></div>
+            
+            <div class="api-endpoint">
+                GET /api/price/history
+            </div>
+            <button onclick="testPriceHistory()">测试价格历史</button>
+            <div id="historyResult" class="results"></div>
+        </div>
+        
+        <div class="card">
+            <h2>完整系统测试</h2>
+            
+            <div class="api-endpoint">
+                POST /api/dual-track/analyze
+            </div>
+            <div>
+                <label>基础价格: <input type="number" id="basePrice" value="750" step="10"></label>
+            </div>
+            <div>
+                <label>回溯天数: <input type="number" id="daysBack" value="7" step="1" min="1" max="30"></label>
+            </div>
+            <button onclick="testFullAnalysis()">测试完整分析</button>
+            <div id="fullResult" class="results"></div>
+            
+            <h3>系统信息</h3>
+            <button onclick="testSystemInfo()">获取系统信息</button>
+            <div id="systemInfo" class="results"></div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>实时状态</h2>
+        <div id="connectionStatus">🔍 正在检查连接...</div>
+        <div id="performanceStatus"></div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:5002/api';
+        
+        // 检查连接状态
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/status`);
+                const data = await response.json();
+                document.getElementById('connectionStatus').innerHTML = 
+                    `<span class="success">✅ 已连接到API服务器</span> (${data.version}, ${data.mode}模式)`;
+                document.getElementById('performanceStatus').innerHTML = 
+                    `响应时间: ${new Date().toLocaleTimeString()}<br>服务器状态: ${data.status}`;
+            } catch (error) {
+                document.getElementById('connectionStatus').innerHTML = 
+                    `<span class="error">❌ 无法连接到API服务器: ${error.message}</span>`;
+            }
+        }
+        
+        // 通用API测试函数
+        async function testAPI(endpoint, method = 'GET', data = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            if (data && method === 'POST') {
+                options.body = JSON.stringify(data);
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                const result = await response.json();
+                return {
+                    success: true,
+                    data: result,
+                    time: new Date().toLocaleTimeString()
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: error.message,
+                    time: new Date().toLocaleTimeString()
+                };
+            }
+        }
+        
+        // 测试状态端点
+        async function testStatus() {
+            const resultDiv = document.getElementById('statusResult');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const result = await testAPI('/status');
+            displayResult(resultDiv, result);
+        }
+        
+        // 测试快速分析
+        async function testQuickAnalysis() {
+            const resultDiv = document.getElementById('quickResult');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const result = await testAPI('/dual-track/quick');
+            displayResult(resultDiv, result);
+        }
+        
+        // 测试市场趋势
+        async function testMarketTrend() {
+            const resultDiv = document.getElementById('trendResult');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const result = await testAPI('/market/trend');
+            displayResult(resultDiv, result);
+        }
+        
+        // 测试价格历史
+        async function testPriceHistory() {
+            const resultDiv = document.getElementById('historyResult');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const result = await testAPI('/price/history?period=daily&days=30');
+            displayResult(resultDiv, result);
+        }
+        
+        // 测试完整分析
+        async function testFullAnalysis() {
+            const resultDiv = document.getElementById('fullResult');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const basePrice = parseFloat(document.getElementById('basePrice').value);
+            const daysBack = parseInt(document.getElementById('daysBack').value);
+            
+            const result = await testAPI('/dual-track/analyze', 'POST', {
+                base_price: basePrice,
+                days_back: daysBack
+            });
+            displayResult(resultDiv, result);
+        }
+        
+        // 测试系统信息
+        async function testSystemInfo() {
+            const resultDiv = document.getElementById('systemInfo');
+            resultDiv.innerHTML = '<span class="loading">测试中...</span>';
+            
+            const result = await testAPI('/system/info');
+            displayResult(resultDiv, result);
+        }
+        
+        // 显示结果
+        function displayResult(element, result) {
+            if (result.success) {
+                element.innerHTML = `
+                    <span class="success">✅ 测试成功 (${result.time})</span>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                `;
+            } else {
+                element.innerHTML = `
+                    <span class="error">❌ 测试失败 (${result.time})</span>
+                    <pre>${result.error}</pre>
+                `;
+            }
+        }
+        
+        // 页面加载时检查连接
+        window.onload = function() {
+            checkConnection();
+            // 每隔30秒刷新一次连接状态
+            setInterval(checkConnection, 30000);
+        };
+    </script>
+</body>
+</html>
