@@ -1,7 +1,7 @@
 // 煤炭双轨制价格预测系统 - API集成版
 // 连接到后端API服务器，提供实时双轨制价格分析
 
-const API_BASE_URL = 'http://localhost:5002/api';
+const API_BASE_URL = "https://spike.pythonanywhere.com/api";
 let currentCharts = {};
 
 document.addEventListener('DOMContentLoaded', function() {

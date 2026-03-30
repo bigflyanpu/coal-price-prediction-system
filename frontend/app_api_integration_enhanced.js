@@ -1,5 +1,8 @@
 // 双轨制分析增强功能 - 为新网站集成添加
 
+// API基础地址 - 与主文件保持一致
+const API_BASE_URL = 'https://spike.pythonanywhere.com/api';
+
 // 检查API状态并更新状态面板
 async function checkAPIStatus() {
     try {
